@@ -22,4 +22,20 @@ class TicketRateLimitTest extends TestCase
         $this->postJson('/api/tickets', $payload)->assertSuccessful();
         $this->postJson('/api/tickets', $payload)->assertStatus(429);
     }
+
+    public function test_ticket_rate_limit_by_phone_per_day(): void
+    {
+        $payload = [
+            'name' => 'John',
+            'email' => 'unique-email@example.com',
+            'phone' => '+380501999888',
+            'subject' => 'Hi',
+            'message' => 'Test',
+        ];
+
+        $this->postJson('/api/tickets', $payload)->assertSuccessful();
+
+        $payload['email'] = 'another-email@example.com';
+        $this->postJson('/api/tickets', $payload)->assertStatus(429);
+    }
 }
