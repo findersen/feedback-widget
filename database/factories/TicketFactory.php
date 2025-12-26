@@ -18,11 +18,13 @@ class TicketFactory extends Factory
      */
     public function definition(): array
     {
+        $status = $this->faker->randomElement(['new', 'in_work', 'processed']);
+
         return [
             'customer_id' => Customer::factory(),
             'subject' => $this->faker->sentence(5),
             'message' => $this->faker->paragraphs(asText: true),
-            'status' => $$this->faker->randomElement(['new', 'in_work', 'processed']),
+            'status' => $status,
             'manager_answered_at' => $status === 'processed'
                 ? Carbon::now()->subDays($this->faker->numberBetween(0, 14))
                 : null,

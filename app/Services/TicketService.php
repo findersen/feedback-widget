@@ -34,7 +34,7 @@ class TicketService
             'subject' => $payload['subject'],
             'message' => $payload['message'],
             'status' => Ticket::STATUS_NEW,
-            'manager_replied_at' => null,
+            'manager_answered_at' => null,
         ]);
 
         if ($files->isNotEmpty()) {

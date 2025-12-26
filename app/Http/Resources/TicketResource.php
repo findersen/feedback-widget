@@ -19,7 +19,7 @@ class TicketResource extends JsonResource
             'subject' => $this->subject,
             'message' => $this->message,
             'status' => $this->status,
-            'manager_replied_at' => $this->manager_replied_at?->toIso8601String(),
+            'manager_answered_at' => $this->manager_answered_at?->toIso8601String(),
             'created_at' => $this->created_at?->toIso8601String(),
 
             'customer' => [

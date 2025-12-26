@@ -24,11 +24,11 @@ class Ticket extends Model implements HasMedia
         'subject',
         'message',
         'status',
-        'manager_replied_at',
+        'manager_answered_at',
     ];
 
     protected $casts = [
-        'manager_replied_at' => 'datetime',
+        'manager_answered_at' => 'datetime',
     ];
 
     public function customer(): BelongsTo

@@ -22,25 +22,25 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        RateLimiter::for('ticket-submit', function (Request $request) {
-            $email = $request->string('email')->lower()->trim()->toString();
-            $phone = trim((string) $request->input('phone', ''));
+        // RateLimiter::for('ticket-submit', function (Request $request) {
+        //     $email = $request->string('email')->lower()->trim()->toString();
+        //     $phone = trim((string) $request->input('phone', ''));
 
-            $limits = [];
+        //     $limits = [];
 
-            if ($email !== '') {
-                $limits[] = Limit::perDay(1)->by('ticket:email:' . $email);
-            }
+        //     if ($email !== '') {
+        //         $limits[] = Limit::perDay(1)->by('ticket:email:' . $email);
+        //     }
 
-            if ($phone !== '') {
-                $limits[] = Limit::perDay(1)->by('ticket:phone:' . $phone);
-            }
+        //     if ($phone !== '') {
+        //         $limits[] = Limit::perDay(1)->by('ticket:phone:' . $phone);
+        //     }
 
-            if ($limits === []) {
-                $limits[] = Limit::perDay(1)->by('ticket:ip:' . $request->ip());
-            }
+        //     if ($limits === []) {
+        //         $limits[] = Limit::perDay(1)->by('ticket:ip:' . $request->ip());
+        //     }
 
-            return $limits;
-        });
+        //     return $limits;
+        // });
     }
 }
