@@ -1,0 +1,126 @@
+openapi: 3.0.3
+info:
+  title: Feedback Widget API
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080
+paths:
+  /api/tickets:
+    post:
+      summary: Create ticket
+      description: Creates a support ticket from public widget. Rate limited to 1/day per email/phone.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TicketCreateRequest"
+          multipart/form-data:
+            schema:
+              allOf:
+                - $ref: "#/components/schemas/TicketCreateRequest"
+                - type: object
+                  properties:
+                    files:
+                      type: array
+                      items:
+                        type: string
+                        format: binary
+      responses:
+        "200":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TicketResponse"
+        "422":
+          description: Validation error
+        "429":
+          description: Rate limit exceeded
+  /api/tickets/statistics:
+    get:
+      summary: Tickets statistics
+      responses:
+        "200":
+          description: Statistics
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TicketStatisticsResponse"
+
+components:
+  schemas:
+    CustomerInput:
+      type: object
+      required: [name]
+      properties:
+        name:
+          type: string
+          maxLength: 255
+        email:
+          type: string
+          nullable: true
+          format: email
+        phone:
+          type: string
+          nullable: true
+          description: E.164 format
+          example: "+380501112233"
+
+    TicketCreateRequest:
+      type: object
+      required: [customer, subject, message]
+      properties:
+        customer:
+          $ref: "#/components/schemas/CustomerInput"
+        subject:
+          type: string
+          maxLength: 255
+        message:
+          type: string
+          maxLength: 5000
+
+    TicketCustomer:
+      type: object
+      properties:
+        id: { type: integer }
+        name: { type: string }
+        email: { type: string, nullable: true }
+        phone: { type: string, nullable: true }
+
+    Ticket:
+      type: object
+      properties:
+        id: { type: integer }
+        status: { type: string, enum: [new, in_progress, done] }
+        subject: { type: string }
+        message: { type: string }
+        created_at: { type: string, format: date-time }
+        customer:
+          $ref: "#/components/schemas/TicketCustomer"
+        attachments:
+          type: array
+          items:
+            type: object
+            properties:
+              name: { type: string }
+              url: { type: string }
+
+    TicketResponse:
+      type: object
+      properties:
+        data:
+          $ref: "#/components/schemas/Ticket"
+
+    TicketStatistics:
+      type: object
+      properties:
+        day: { type: integer }
+        week: { type: integer }
+        month: { type: integer }
+
+    TicketStatisticsResponse:
+      type: object
+      properties:
+        data:
+          $ref: "#/components/schemas/TicketStatistics"

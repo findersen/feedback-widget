@@ -1,59 +1,163 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Feedback Widget (Laravel 12)
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+A small demo project: **public feedback widget** + **API** + **admin panel** for managing tickets.
 
-## About Laravel
+## Tech stack
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+-   PHP 8.4, Laravel 12
+-   PostgreSQL (Docker)
+-   Spatie: `laravel-permission`, `laravel-medialibrary`
+-   TailwindCSS + Vite (frontend assets)
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+---
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## Features
 
-## Learning Laravel
+### Public widget
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+-   Page: `GET /widget`
+-   Submit form via AJAX to: `POST /api/tickets`
+-   Supports optional file attachments (stored via Spatie MediaLibrary)
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+### API
 
-## Laravel Sponsors
+-   `POST /api/tickets` — create ticket (rate-limited: max 1 ticket / day per phone/email)
+-   `GET /api/tickets/statistics` — `{ day, week, month }` counts
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+### Admin
 
-### Premium Partners
+-   Page: `GET /admin/tickets` (requires auth + `manager` role)
+-   Ticket list with filters/search + ticket details page
+-   Status update (`new` → `in_progress` → `done`)
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+### Tests
 
-## Contributing
+Feature tests included for:
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+-   Ticket creation
+-   Rate limit (per email/phone per day)
+-   Statistics endpoint
 
-## Code of Conduct
+---
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+## Local development (Docker)
 
-## Security Vulnerabilities
+### 1) Clone + env
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+```bash
+git clone https://github.com/findersen/feedback-widget.git
+cd feedback-widget
 
-## License
+cp .env.example .env
+# ensure DB points to docker service:
+# DB_CONNECTION=pgsql
+# DB_HOST=db
+# DB_PORT=5432
+# DB_DATABASE=crm
+# DB_USERNAME=crm
+# DB_PASSWORD=crm
+```
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+### 2) Start containers
+
+```bash
+docker compose up -d --build
+```
+
+### 3) Install dependencies (inside container)
+
+```bash
+docker compose exec app composer install
+docker compose exec app php artisan key:generate
+```
+
+### 4) Migrations + seed
+
+```bash
+docker compose exec app php artisan migrate
+docker compose exec app php artisan db:seed
+```
+
+### 5) Storage (attachments)
+
+```bash
+docker compose exec app php artisan storage:link
+```
+
+### 6) Frontend assets (Tailwind)
+
+Development (watch):
+
+```bash
+docker compose exec app npm install
+docker compose exec app npm run dev
+```
+
+Production build:
+
+```bash
+docker compose exec app npm run build
+```
+
+## Default credentials (seeded)
+
+After seeding, a demo manager user is created.
+Check your Database\\Seeders\\DemoDataSeeder for the exact email/password used.
+
+Login:
+GET /login
+
+Admin:
+GET /admin/tickets
+
+## API usage examples
+
+### Create ticket
+
+```bash
+curl -X POST http://localhost:8080/api/tickets \
+  -H "Accept: application/json" \
+  -F "customer[name]=John Doe" \
+  -F "customer[email]=test@example.com" \
+  -F "customer[phone]=+380501112233" \
+  -F "subject=Hello" \
+  -F "message=Test message" \
+  -F "files[]=@/path/to/file1.png"
+```
+
+### Statistics
+
+```bash
+curl http://localhost:8080/api/tickets/statistics \
+  -H "Accept: application/json"
+```
+
+### Expected response:
+
+```javascript
+{ "day": 0, "week": 0, "month": 0 }
+```
+
+## Running tests
+
+```bash
+docker compose exec app php artisan test
+```
+
+If you want a clean DB run:
+
+```bash
+docker compose exec app php artisan migrate:fresh --seed
+docker compose exec app php artisan test
+```
+
+## Documentation
+
+Swagger/OpenAPI spec: docs/swagger.yaml
+Architecture / decisions: docs/decisions.md
+
+## Notes
+
+-   Rate limit is enforced per day for a given email or phone (E.164 format).
+-   Attachments are stored via MediaLibrary collection attachments.
+-   Tailwind classes require running npm run dev (or npm run build) so Vite generates assets.
