@@ -54,4 +54,15 @@ class StoreTicketRequest extends FormRequest
             'customer.phone.regex' => 'Phone must be in E.164 format, e.g. +380XXXXXXXXX.',
         ];
     }
+
+    protected function prepareForValidation(): void
+    {
+        $email = $this->input('email');
+        $phone = $this->input('phone');
+
+        $this->merge([
+            'email' => is_string($email) ? mb_strtolower(trim($email)) : $email,
+            'phone' => is_string($phone) ? preg_replace('/\s+/', '', trim($phone)) : $phone,
+        ]);
+    }
 }
