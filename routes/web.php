@@ -9,6 +9,7 @@ Route::get('/', function () {
 });
 
 Route::view('/widget', 'widget')->name('widget');
+Route::view('/frame', 'frame')->name('frame');
 
 Route::get('/dashboard', function () {
     return view('dashboard');
