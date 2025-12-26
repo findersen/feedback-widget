@@ -46,7 +46,6 @@ Feature tests included for:
 
 ```bash
 git clone https://github.com/findersen/feedback-widget.git
-cd feedback-widget
 
 cp .env.example .env
 # ensure DB points to docker service:
@@ -58,57 +57,52 @@ cp .env.example .env
 # DB_PASSWORD=crm
 ```
 
-### 2) Start containers
+### 2) Frontend assets (Tailwind)
+
+```bash
+npm install
+npm run build
+```
+
+### 3) Start containers
 
 ```bash
 docker compose up -d --build
 ```
 
-### 3) Install dependencies (inside container)
+### 4) Install dependencies (inside container)
 
 ```bash
 docker compose exec app composer install
 docker compose exec app php artisan key:generate
 ```
 
-### 4) Migrations + seed
+### 5) Migrations + seed
 
 ```bash
 docker compose exec app php artisan migrate
 docker compose exec app php artisan db:seed
 ```
 
-### 5) Storage (attachments)
+### 6) Storage (attachments)
 
 ```bash
 docker compose exec app php artisan storage:link
 ```
 
-### 6) Frontend assets (Tailwind)
-
-Development (watch):
-
-```bash
-docker compose exec app npm install
-docker compose exec app npm run dev
-```
-
-Production build:
-
-```bash
-docker compose exec app npm run build
-```
-
 ## Default credentials (seeded)
 
 After seeding, a demo manager user is created.
-Check your Database\\Seeders\\DemoDataSeeder for the exact email/password used.
 
-Login:
-GET /login
+Manager data for login:
 
-Admin:
-GET /admin/tickets
+email: manager@example.com
+
+password: password
+
+Login: /login
+
+Admin: /admin/tickets
 
 ## API usage examples
 
@@ -153,8 +147,8 @@ docker compose exec app php artisan test
 
 ## Documentation
 
-Swagger/OpenAPI spec: docs/swagger.yaml
-Architecture / decisions: docs/decisions.md
+Swagger / OpenAPI:
+docs/swagger.yaml
 
 ## Notes
 
