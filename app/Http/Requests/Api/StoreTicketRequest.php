@@ -23,46 +23,48 @@ class StoreTicketRequest extends FormRequest
     {
         return [
             'customer' => ['required', 'array'],
+
             'customer.name' => ['required', 'string', 'max:255'],
-            'customer.email' => ['nullable', 'email', 'max:255'],
-            'customer.phone' => ['nullable', 'string', 'regex:/^\+[1-9]\d{1,14}$/'],
+
+            // хоча б одне з двох:
+            'customer.email' => ['nullable', 'email', 'max:255', 'required_without:customer.phone'],
+            'customer.phone' => ['nullable', 'string', 'regex:/^\+[1-9]\d{1,14}$/', 'required_without:customer.email'],
 
             'subject' => ['required', 'string', 'max:255'],
             'message' => ['required', 'string', 'max:5000'],
 
             'files' => ['nullable', 'array', 'max:10'],
-            'files.*' => ['file', 'max:10240'], // 10MB
+            'files.*' => ['file', 'max:10240'],
         ];
     }
 
-    public function withValidator($validator): void
+    protected function prepareForValidation(): void
     {
-        $validator->after(function ($validator) {
-            $phone = $this->input('phone');
-            $email = $this->input('email');
+        $customer = $this->input('customer');
+        $customer = is_array($customer) ? $customer : [];
 
-            if (!$phone && !$email) {
-                $validator->errors()->add('phone', 'Phone or email is required.');
-                $validator->errors()->add('email', 'Phone or email is required.');
-            }
-        });
+        // підтримка плоских полів з форми віджета (name/email/phone)
+        $customer['name']  = $customer['name']  ?? $this->input('name');
+        $customer['email'] = $customer['email'] ?? $this->input('email');
+        $customer['phone'] = $customer['phone'] ?? $this->input('phone');
+
+        if (isset($customer['email']) && is_string($customer['email'])) {
+            $customer['email'] = mb_strtolower(trim($customer['email']));
+        }
+
+        if (isset($customer['phone']) && is_string($customer['phone'])) {
+            $customer['phone'] = preg_replace('/\s+/', '', trim($customer['phone']));
+        }
+
+        $this->merge(['customer' => $customer]);
     }
 
     public function messages(): array
     {
         return [
             'customer.phone.regex' => 'Phone must be in E.164 format, e.g. +380XXXXXXXXX.',
+            'customer.email.required_without' => 'Phone or email is required.',
+            'customer.phone.required_without' => 'Phone or email is required.',
         ];
-    }
-
-    protected function prepareForValidation(): void
-    {
-        $email = $this->input('email');
-        $phone = $this->input('phone');
-
-        $this->merge([
-            'email' => is_string($email) ? mb_strtolower(trim($email)) : $email,
-            'phone' => is_string($phone) ? preg_replace('/\s+/', '', trim($phone)) : $phone,
-        ]);
     }
 }
