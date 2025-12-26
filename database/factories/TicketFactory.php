@@ -18,7 +18,7 @@ class TicketFactory extends Factory
      */
     public function definition(): array
     {
-        $status = $this->faker->randomElement(['new', 'in_work', 'processed']);
+        $status = $this->faker->randomElement(['new', 'in_progress', 'done']);
 
         return [
             'customer_id' => Customer::factory(),
