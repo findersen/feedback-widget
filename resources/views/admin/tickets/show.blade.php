@@ -46,7 +46,7 @@
         </div>
     @endif
 
-    <div class="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-12 space-y-6">
+    <div class="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-12">
         {{-- Main --}}
         <div class="lg:col-span-8 space-y-6">
             {{-- Ticket content card --}}
@@ -64,7 +64,7 @@
                     <div class="mt-5">
                         <p class="text-sm font-medium text-gray-500">Message</p>
                         <div class="mt-2 rounded-xl bg-gray-50 ring-1 ring-inset ring-gray-200 p-4">
-                            <p class="whitespace-pre-wrap text-sm leading-6 text-gray-800">
+                            <p class="text-sm leading-6 text-gray-800">
                                 {{ $ticket->message }}
                             </p>
                         </div>
