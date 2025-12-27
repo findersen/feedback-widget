@@ -104,6 +104,10 @@ Login: /login
 
 Admin: /admin/tickets
 
+Widget: /widget
+
+In frame: /frame
+
 ## API usage examples
 
 ### Create ticket
