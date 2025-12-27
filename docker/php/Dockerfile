@@ -2,7 +2,8 @@ FROM php:8.4-fpm
 
 RUN apt-get update && apt-get install -y \
     git unzip libpq-dev libzip-dev \
- && docker-php-ext-install pdo pdo_pgsql zip \
+ && docker-php-ext-configure exif \
+ && docker-php-ext-install pdo pdo_pgsql zip exif \
  && rm -rf /var/lib/apt/lists/*
 
 # Composer
